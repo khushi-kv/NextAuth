@@ -1,52 +1,46 @@
 // pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth"
-import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
+import GithubProvider from "next-auth/providers/github"
+import { NextAuthOptions } from "next-auth"
 import { JWT } from "next-auth/jwt"
+import { Session } from "next-auth"
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     GithubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        // Check if credentials are provided
-        if (!credentials?.username || !credentials?.password) {
-          return null
-        }
-
-        // Simulate user authentication
-        const user = { id: "1", name: "John Doe", email: "john@example.com" }
-
-        // For demo purposes, authenticate with hardcoded username and password
-        if (credentials.username === "admin" && credentials.password === "password") {
-          return user
-        } else {
-          return null
-        }
-      },
-    }),
   ],
   callbacks: {
-    async jwt({ token, account }: { token: JWT, account?: any }) {
+    async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token
+        token.idToken = account.id_token
       }
       return token
     },
-    async session({ session, token }: { session: any, token: JWT }) {
-      session.accessToken = token.accessToken
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (token.accessToken) {
+        session.accessToken = token.accessToken as string
+      }
       return session
-    },
+    }
   },
-})
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
