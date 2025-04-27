@@ -21,7 +21,7 @@ export default function Home() {
             <p className="text-gray-600">Use Google or GitHub to sign in</p>
           </div>
         )}
-      </div>
+        </div>
     </div>
   )
 }

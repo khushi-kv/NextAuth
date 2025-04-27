@@ -35,7 +35,7 @@ const AuthStatus = () => {
         className="text-sm text-indigo-600 hover:text-indigo-800"
       >
         Sign in
-      </button>
+    </button>
     </div>
   );
 };
