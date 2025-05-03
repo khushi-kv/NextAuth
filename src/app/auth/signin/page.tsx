@@ -1,12 +1,27 @@
+// TODO: Article/Docs - Explain OAuthAccountNotLinked error and account linking
+// - Show user-friendly error message on sign-in page
+// - Suggest users sign in with their original method
+// - (Optional) Implement account linking UI in profile/settings page
+// - See: https://next-auth.js.org/faq#how-do-i-link-accounts --> this happens when you try to sign in with a different provider than the one you originally used
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
 
+// Map NextAuth error codes to friendly messages
+const errorMessages: Record<string, string> = {
+  OAuthAccountNotLinked:
+    "An account with this email already exists. Please sign in using the originally used method (e.g., email/password or another provider), then link your account in your profile settings.",
+  CredentialsSignin: "Invalid email or password.",
+  // Add more mappings as needed
+};
+
 export default function SignIn() {
   const router = useRouter()
+  const params = useSearchParams()
+  const urlError = params.get("error")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -37,6 +52,12 @@ export default function SignIn() {
     }
   }
 
+  // Use mapped error message if available
+  const displayError =
+    error ||
+    (urlError && errorMessages[urlError]) ||
+    (urlError && decodeURIComponent(urlError!))
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -46,9 +67,9 @@ export default function SignIn() {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
+          {displayError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-              {error}
+              {displayError}
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
@@ -106,14 +127,14 @@ export default function SignIn() {
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm  text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <span>Google</span>
             </button>
 
             <button
               onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm  text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <span>GitHub</span>
             </button>

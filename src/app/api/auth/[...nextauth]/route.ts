@@ -1,14 +1,15 @@
 // pages/api/auth/[...nextauth].ts
-import NextAuth from "next-auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { NextAuthOptions } from "next-auth"
 import { JWT } from "next-auth/jwt"
 import { Session } from "next-auth"
 import bcrypt from "bcryptjs"
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Role, Permission, UserRole } from "@prisma/client"
 import { PrismaAdapter } from "@auth/prisma-adapter"
+import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
 
 const prisma = new PrismaClient()
 
@@ -63,7 +64,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account) {
-        // This ensures the OAuth account is stored
         return true
       }
       return true
@@ -73,11 +73,27 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token
         token.idToken = account.id_token
       }
+      if (user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { role: true }
+        })
+        if (dbUser?.role) {
+          token.role = dbUser.role.name
+        }
+        token.id = user.id
+      }
       return token
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (token?.accessToken) {
         session.accessToken = token.accessToken as string
+      }
+      if (token?.role) {
+        session.user.role = token.role
+      }
+      if (token?.id) {
+        session.user.id = token.id
       }
       return session
     },
@@ -89,42 +105,21 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error",
+    error: "/auth/signin",
   },
-  // 8. Session configuration
-  // ARTICLE NOTE: In the article, we'll explain both JWT and Database session strategies
-  // with their pros and cons. JWT is stateless and faster, while Database sessions
-  // offer better security and control. Here's how to implement both:
-
-  // Option 1: Database Sessions (Current Implementation)
-  session: {
-    strategy: "database",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-
-  // Option 2: JWT Sessions (Alternative Implementation)
-  // Uncomment this section to use JWT instead of database sessions
-  /*
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    encryption: true,
-  },
-  */
-
-  // ARTICLE NOTE: When documenting in the article, we'll include:
-  // 1. Performance comparison between JWT and Database sessions
-  // 2. Security implications of each approach
-  // 3. Use cases for choosing one over the other
-  // 4. Code examples for both implementations
-  // 5. Migration strategies between the two
-
-  // 9. Use Prisma adapter for database operations
   adapter: PrismaAdapter(prisma),
+  events: {
+    async createUser({ user }: { user: { id: string } }) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: { connect: { id: "user_role" } } }
+      });
+    }
+  }
 }
 
 const handler = NextAuth(authOptions)
