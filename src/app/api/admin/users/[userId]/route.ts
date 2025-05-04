@@ -18,18 +18,36 @@ export const PATCH = withRole(UserRole.ADMIN)(async (req: NextRequest) => {
       )
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { role },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
+    // Find the role ID first
+    const roleRecord = await prisma.role.findFirst({
+      where: { name: role }
     })
 
-    return NextResponse.json(updatedUser)
+    if (!roleRecord) {
+      return NextResponse.json(
+        { error: "Role not found" },
+        { status: 404 }
+      )
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        role: {
+          connect: { id: roleRecord.id }
+        }
+      },
+      include: {
+        role: true
+      }
+    })
+
+    return NextResponse.json({
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role
+    })
   } catch (error) {
     console.error("Error updating user role:", error)
     return NextResponse.json(

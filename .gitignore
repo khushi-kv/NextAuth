@@ -27,6 +27,9 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.development
+.env.production
+.env.test
 
 # vercel
 .vercel
@@ -38,3 +41,7 @@ next-env.d.ts
 # IDE
 .idea
 .vscode
+
+# test files
+/src/app/token-debug/
+/src/components/TokenDebug.tsx
