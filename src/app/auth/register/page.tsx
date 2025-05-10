@@ -4,10 +4,44 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
+// Password validation rules
+const passwordRules = {
+  minLength: 8,
+  hasUpperCase: /[A-Z]/,
+  hasLowerCase: /[a-z]/,
+  hasNumber: /[0-9]/,
+  hasSpecialChar: /[^A-Za-z0-9]/
+}
+
 export default function Register() {
   const router = useRouter()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [password, setPassword] = useState("")
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+
+  const validatePassword = (value: string) => {
+    const errors: string[] = []
+    
+    if (value.length < passwordRules.minLength) {
+      errors.push(`Password must be at least ${passwordRules.minLength} characters`)
+    }
+    if (!passwordRules.hasUpperCase.test(value)) {
+      errors.push("Password must contain at least one uppercase letter")
+    }
+    if (!passwordRules.hasLowerCase.test(value)) {
+      errors.push("Password must contain at least one lowercase letter")
+    }
+    if (!passwordRules.hasNumber.test(value)) {
+      errors.push("Password must contain at least one number")
+    }
+    if (!passwordRules.hasSpecialChar.test(value)) {
+      errors.push("Password must contain at least one special character")
+    }
+
+    setPasswordErrors(errors)
+    return errors.length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -18,6 +52,12 @@ export default function Register() {
     const name = formData.get("name") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+
+    // Validate password before submission
+    if (!validatePassword(password)) {
+      setLoading(false)
+      return
+    }
 
     try {
       const response = await fetch("/api/register", {
@@ -99,17 +139,39 @@ export default function Register() {
                 type="password"
                 autoComplete="new-password"
                 required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  validatePassword(e.target.value)
+                }}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
             </div>
           </div>
 
+          {passwordErrors.length > 0 && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+              <div className="flex">
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    Password requirements:
+                  </p>
+                  <ul className="mt-2 text-sm text-yellow-700 list-disc list-inside">
+                    {passwordErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={loading || passwordErrors.length > 0}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create account"}
             </button>

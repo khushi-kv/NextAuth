@@ -5,12 +5,10 @@
 // - See: https://next-auth.js.org/faq#how-do-i-link-accounts --> this happens when you try to sign in with a different provider than the one you originally used
 "use client"
 
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { signIn } from "next-auth/react"
+
 import { Suspense } from "react"
 import SignInForm from "@/components/auth/SignInForm"
+
 
 // Map NextAuth error codes to friendly messages
 const errorMessages: Record<string, string> = {

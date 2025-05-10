@@ -1,17 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { signIn } from "next-auth/react"
-
-// Map NextAuth error codes to friendly messages
-const errorMessages: Record<string, string> = {
-  OAuthAccountNotLinked:
-    "An account with this email already exists. Please sign in using the originally used method (e.g., email/password or another provider), then link your account in your profile settings.",
-  CredentialsSignin: "Invalid email or password.",
-  // Add more mappings as needed
-};
 
 // Password validation rules
 const passwordRules = {
@@ -22,10 +13,8 @@ const passwordRules = {
   hasSpecialChar: /[^A-Za-z0-9]/
 }
 
-export default function SignInForm() {
+export default function SignUpForm() {
   const router = useRouter()
-  const params = useSearchParams()
-  const urlError = params.get("error")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState("")
@@ -61,6 +50,7 @@ export default function SignInForm() {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
+    const name = formData.get("name") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
 
@@ -71,16 +61,25 @@ export default function SignInForm() {
     }
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: true,
-        callbackUrl: "/dashboard"
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
       })
 
-      if (result?.error) {
-        throw new Error(result.error)
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || "Something went wrong")
       }
+
+      // Redirect to sign in page after successful registration
+      router.push("/auth/signin?registered=true")
     } catch (error) {
       setError(error instanceof Error ? error.message : "Something went wrong")
     } finally {
@@ -88,27 +87,35 @@ export default function SignInForm() {
     }
   }
 
-  // Use mapped error message if available
-  const displayError =
-    error ||
-    (urlError && errorMessages[urlError]) ||
-    (urlError && decodeURIComponent(urlError!))
-
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to your account
+            Create your account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {displayError && (
+          {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-              {displayError}
+              {error}
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Full name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Full name"
+              />
+            </div>
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address
@@ -119,7 +126,7 @@ export default function SignInForm() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
               />
             </div>
@@ -131,7 +138,7 @@ export default function SignInForm() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => {
@@ -183,45 +190,19 @@ export default function SignInForm() {
               disabled={loading || passwordErrors.length > 0}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Creating account..." : "Sign up"}
             </button>
           </div>
         </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-500">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span>Google</span>
-            </button>
-
-            <button
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span>GitHub</span>
-            </button>
-          </div>
-        </div>
-
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/auth/register"
+              href="/auth/signin"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
-              Sign up
+              Sign in
             </Link>
           </p>
         </div>
