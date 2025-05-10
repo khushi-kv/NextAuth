@@ -44,6 +44,7 @@ model User {
   roleId        String?
   accounts      Account[]
   sessions      Session[]
+
 }
 
 model VerificationToken {

@@ -74,12 +74,14 @@ export default function SignInForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: true,
+        redirect: false,
         callbackUrl: "/dashboard"
       })
 
       if (result?.error) {
-        throw new Error(result.error)
+        setError(errorMessages[result.error] || result.error)
+      } else if (result?.url) {
+        router.push(result.url)
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Something went wrong")
@@ -138,13 +140,13 @@ export default function SignInForm() {
                   setPassword(e.target.value)
                   validatePassword(e.target.value)
                 }}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none cursor-pointer rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
               >
                 {showPassword ? (
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
