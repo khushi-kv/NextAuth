@@ -6,6 +6,8 @@ import { signOut } from "next-auth/react"
 import { RoleBasedSection } from "@/components/RoleBasedContent"
 import { UserRole } from "@prisma/client"
 import { Suspense } from "react"
+import { useEffect } from "react"
+import { toast } from 'react-toastify'
 
 // Loading component
 function LoadingState() {
@@ -30,6 +32,12 @@ function ErrorMessage() {
 function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
+    toast.success("Successfully logged out!")
+    router.push("/auth/signin")
+  }
 
   if (status === "loading") {
     return <LoadingState />
@@ -73,8 +81,8 @@ function DashboardContent() {
       </RoleBasedSection>
 
       <button
-        onClick={() => signOut()}
-        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        onClick={handleSignOut}
+        className="text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
       >
         Sign Out
       </button>

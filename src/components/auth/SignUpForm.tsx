@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { toast } from 'react-toastify'
 
 // Password validation rules
 const passwordRules = {
@@ -61,7 +62,7 @@ export default function SignUpForm() {
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,10 +79,13 @@ export default function SignUpForm() {
         throw new Error(data.message || "Something went wrong")
       }
 
+      toast.success("Account created successfully!")
       // Redirect to sign in page after successful registration
       router.push("/auth/signin?registered=true")
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Something went wrong")
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong"
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -91,7 +95,7 @@ export default function SignUpForm() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-black">
             Create your account
           </h2>
         </div>
@@ -151,7 +155,7 @@ export default function SignUpForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 cursor-pointer"
               >
                 {showPassword ? (
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

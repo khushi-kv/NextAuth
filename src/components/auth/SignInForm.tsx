@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import { toast } from 'react-toastify'
 
 // Map NextAuth error codes to friendly messages
 const errorMessages: Record<string, string> = {
@@ -80,11 +81,15 @@ export default function SignInForm() {
 
       if (result?.error) {
         setError(errorMessages[result.error] || result.error)
+        toast.error(errorMessages[result.error] || result.error)
       } else if (result?.url) {
+        toast.success("Successfully logged in!")
         router.push(result.url)
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Something went wrong")
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong"
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -100,7 +105,7 @@ export default function SignInForm() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-black">
             Sign in to your account
           </h2>
         </div>

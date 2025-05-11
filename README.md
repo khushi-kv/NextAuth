@@ -1,163 +1,298 @@
-# Next.js Role-Based Access Control (RBAC)
+# Next.js Authentication & Authorization System
 
-A robust role-based access control system built with Next.js 14, NextAuth.js, and Prisma. This implementation provides secure authentication and authorization with support for multiple user roles and OAuth providers.
+A comprehensive authentication and authorization system built with Next.js 14, NextAuth.js, and Prisma. This implementation provides secure authentication, role-based access control, and OAuth integration with best practices for security and performance.
 
-## Features
+## 🌟 Features
 
-- 🔐 **Authentication**
-  - Email/Password authentication with bcrypt hashing
-  - OAuth providers (Google, GitHub)
-  - JWT-based session management
-  - Secure password hashing with bcrypt
-  - OAuth account linking support
-  - Custom error handling for authentication failures
-  - Token refresh mechanism with 30-day expiration
-  - Automatic token refresh 5 minutes before expiration
+### Authentication
+- ✅ Email/Password authentication with secure validation
+- ✅ Google & GitHub OAuth integration
+- ✅ Password visibility toggle
+- ✅ Secure password requirements
+- ✅ Toast notifications for feedback
+- ✅ Form validation and error handling
 
-- 👥 **Role-Based Access Control**
-  - Multiple user roles (Admin, User, Vendor, Support)
-  - Role-based middleware protection
-  - Protected API routes
-  - Role-based UI components
-  - Default role assignment for new users
-  - Role management through admin interface
+### Role-Based Access Control
+- ✅ Multiple user roles (Admin, Vendor, Support, User)
+- ✅ Role-specific dashboards
+- ✅ Protected routes and API endpoints
+- ✅ Dynamic content based on user role
+- ✅ Middleware protection
 
-- 🛡️ **Security**
-  - Protected routes and API endpoints
-  - JWT-based session management
-  - Environment variable protection
-  - Type-safe database operations
-  - Rate limiting support
-  - Secure cookie handling
-  - Secure token storage and handling
-  - Force refresh capability for manual token updates
+### Security Features
+- ✅ JWT-based session management
+- ✅ Automatic token refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
 
-## Session and Token Management
+### User Experience
+- ✅ Responsive design with Tailwind CSS
+- ✅ Loading states
+- ✅ Error messages
+- ✅ Toast notifications
+- ✅ Smooth transitions
 
-The application implements a secure token management system:
-
-### JWT Sessions
-```typescript
-// JWT-based session configuration
-session: {
-  strategy: "jwt",
-  maxAge: 30 * 24 * 60 * 60, // 30 days
-},
-jwt: {
-  secret: process.env.NEXTAUTH_SECRET,
-  maxAge: 30 * 24 * 60 * 60, // 30 days
-  encryption: true,
-}
-```
-
-### Token Refresh
-- Tokens expire after 30 days
-- Automatic refresh 5 minutes before expiration
-- Manual refresh capability through `/api/auth/force-refresh`
-- Secure token storage and handling
-
-## API Routes
-
-- `/api/auth/[...nextauth]` - NextAuth configuration and handlers
-- `/api/auth/refresh` - Automatic token refresh endpoint
-- `/api/auth/force-refresh` - Manual token refresh endpoint
-- `/api/admin/*` - Protected admin routes
-- `/api/protected/*` - Role-based protected routes
-
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Framework:** Next.js 14
 - **Authentication:** NextAuth.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma
+- **Database:** PostgreSQL with Prisma
 - **Styling:** Tailwind CSS
-- **Language:** TypeScript
+- **Notifications:** React-Toastify
+- **Type Safety:** TypeScript
 
-## Getting Started
+## 📦 Installation Steps (In Order)
 
-### Prerequisites
+### 1. Prerequisites
+- Node.js 18+
+- PostgreSQL (Required for Prisma)
+- Google OAuth credentials (Optional)
+- GitHub OAuth credentials (Optional)
 
-- Node.js 18+ 
-- PostgreSQL database
-- Google OAuth credentials (optional)
-- GitHub OAuth credentials (optional)
+### 2. Backend Setup
 
-### Environment Variables
+#### A. Database Setup (Required First)
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
 
-Create a `.env` file in the root directory:
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
 
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+   # Create database
+   CREATE DATABASE nextauth_db;
 
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key"
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
 
-# OAuth Providers (Optional)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-GITHUB_ID="your-github-id"
-GITHUB_SECRET="your-github-secret"
-```
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
 
-### Installation
+#### B. Prisma Setup
+1. **Install Prisma**
+   ```bash
+   npm install prisma --save-dev
+   ```
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd nextauth-rbac
-```
+2. **Initialize Prisma**
+   ```bash
+   npx prisma init
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+3. **Generate Prisma Client**
+   ```bash
+   npx prisma generate
+   ```
 
-3. Set up the database:
-```bash
-npx prisma generate
-npx prisma db push
-```
+4. **Push Schema to Database**
+   ```bash
+   npx prisma db push
+   ```
 
-4. Run the development server:
+### 3. Frontend Setup
+
+#### A. Project Setup
+1. **Clone and Install**
+   ```bash
+   git clone <repository-url>
+   cd nextauth
+   npm install
+   ```
+
+2. **Environment Variables**
+   ```env
+   # Database (Required)
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   
+   # NextAuth (Required)
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key"
+   
+   # OAuth Providers (Optional)
+   GOOGLE_CLIENT_ID="your-google-client-id"
+   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   GITHUB_ID="your-github-id"
+   GITHUB_SECRET="your-github-secret"
+   ```
+
+#### B. Development Server
 ```bash
 npm run dev
 ```
 
-## Role System
+### Important Notes
+- ✅ Backend must be set up before Frontend
+- ✅ PostgreSQL must be installed and running before Prisma setup
+- ✅ Database must be created before running Prisma commands
+- ✅ Environment variables must be set correctly
+- ✅ Prisma Client must be generated after schema changes
 
-The application implements the following roles:
+### Development Workflow
+1. **Backend Changes**
+   - Modify `schema.prisma`
+   - Run `npx prisma generate`
+   - Run `npx prisma db push`
 
+2. **Frontend Changes**
+   - Modify components
+   - Test in development
+   - Build for production
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   └── auth/
+│       ├── SignInForm.tsx     # Sign in form
+│       └── SignUpForm.tsx     # Registration form
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔐 Database Schema
+
+```prisma
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum UserRole {
+  ADMIN
+  VENDOR
+  SUPPORT
+  USER
+}
+```
+
+## 🔄 Authentication Flows
+
+### Sign In Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SignInForm
+    participant NextAuth
+    participant Database
+    participant Dashboard
+
+    User->>SignInForm: Enter credentials
+    SignInForm->>NextAuth: Submit credentials
+    NextAuth->>Database: Verify credentials
+    Database-->>NextAuth: User data
+    NextAuth-->>SignInForm: Auth result
+    SignInForm->>Dashboard: Redirect on success
+```
+
+### Registration Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SignUpForm
+    participant API
+    participant Database
+    participant SignInForm
+
+    User->>SignUpForm: Enter details
+    SignUpForm->>SignUpForm: Validate password
+    SignUpForm->>API: Submit registration
+    API->>Database: Create user
+    Database-->>API: User created
+    API-->>SignUpForm: Success response
+    SignUpForm->>SignInForm: Redirect to login
+```
+
+## 👥 Role-Based Access
+
+### User Roles
 - **Admin:** Full system access
-- **User:** Basic user access
-- **Vendor:** Vendor-specific access
-- **Support:** Support team access
+- **Vendor:** Product management and sales analytics
+- **Support:** Customer ticket management
+- **User:** Basic user features
 
-### Role Assignment
-
-- New users are automatically assigned the "User" role
-- Role changes can be made through the admin interface
-- OAuth users are assigned a default role upon first login
-- Role information is included in the JWT token and session
-
-## Protected Routes
-
-### API Routes
-- `/api/admin/*` - Admin-only routes
-- `/api/protected/*` - Role-based protected routes
-- `/api/auth/refresh` - Token refresh endpoint
-- `/api/auth/force-refresh` - Manual token refresh endpoint
-
-### Pages
-- `/admin/*` - Admin dashboard and management
-- `/dashboard` - User dashboard
-- `/auth/*` - Authentication pages
-
-## Middleware Protection
-
-The application uses middleware to protect routes based on user roles:
-
+### Role Protection
 ```typescript
 // Example of role-based middleware
 export const withRole = (role: UserRole) => {
@@ -173,93 +308,203 @@ export const withRole = (role: UserRole) => {
 }
 ```
 
-## Database Schema
+## 🔒 Security Features
 
-The application uses Prisma with the following main models:
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Automatic token refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
 
-- **User:** User accounts and authentication
-  - Basic user information (name, email, password)
-  - Role relationship
-  - OAuth account connections
-- **Role:** User roles and permissions
-  - Role name (enum: ADMIN, USER, VENDOR, SUPPORT)
-  - User relationships
-- **Account:** OAuth account connections
-  - Provider information
-  - Access tokens
-  - Refresh tokens
-- **Session:** User sessions (when using database sessions)
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
 
-## Contributing
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- Next.js team for the amazing framework
-- NextAuth.js for authentication
-- Prisma team for the database toolkit
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
 
-# NextAuth Authentication Implementation
+## 🗄️ Prisma Setup & Commands
 
-This project implements a secure authentication system using NextAuth.js with the following features:
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
 
-## Core Features
+# Initialize Prisma in your project
+npx prisma init
 
-- JWT-based authentication
-- Token refresh mechanism
-- Role-based access control
-- Session management
-- Protected API routes
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
 
-## Token Management
+# Push schema changes to database
+npx prisma db push
+```
 
-- Tokens expire after 30 days
-- Automatic refresh 5 minutes before expiration
-- Secure token storage and handling
-- Force refresh capability for manual token updates
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
 
-## API Routes
+# Apply pending migrations
+npx prisma migrate deploy
 
-- `/api/auth/[...nextauth]` - NextAuth configuration and handlers
-- `/api/auth/refresh` - Token refresh endpoint
-- `/api/auth/force-refresh` - Manual token refresh endpoint
-- `/api/admin/*` - Protected admin routes
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
 
-## Security Features
+# View database with Prisma Studio
+npx prisma studio
+```
 
-- Secure token handling
-- Role-based middleware
-- Protected API routes
-- Session validation
-- Type safety
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
 
-## Development
+# Validate schema.prisma file
+npx prisma validate
 
-1. Install dependencies:
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
    ```bash
-   npm install
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
    ```
 
-2. Set up environment variables:
+3. **Update Environment Variables**
    ```env
-   NEXTAUTH_URL=http://localhost:3000
-   NEXTAUTH_SECRET=your-secret-key
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
    ```
 
-3. Run the development server:
+### Database Connection
+
+1. **Test Connection**
    ```bash
-   npm run dev
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
    ```
 
-## Testing
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
 
-For testing token refresh functionality, use the TokenDebug component (not included in production).
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
