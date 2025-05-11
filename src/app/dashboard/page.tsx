@@ -8,6 +8,8 @@ import { UserRole } from "@prisma/client"
 import { Suspense } from "react"
 import { useEffect } from "react"
 import { toast } from 'react-toastify'
+import SessionTimer from "@/components/SessionTimer"
+
 
 // Loading component
 function LoadingState() {
@@ -51,7 +53,7 @@ function DashboardContent() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      
+
       <RoleBasedSection role={UserRole.ADMIN}>
         <div className="p-4 rounded-lg mb-4">
           <h2 className="text-xl font-semibold mb-2">Admin Panel</h2>
@@ -86,6 +88,9 @@ function DashboardContent() {
       >
         Sign Out
       </button>
+
+      {/* Session Timer  to test the token refresh*/}
+      {/* <SessionTimer /> */}
     </div>
   )
 }

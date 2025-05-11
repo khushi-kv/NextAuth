@@ -64,17 +64,24 @@ const authOptions: AuthOptions = {
     })
   ],
   debug: process.env.NODE_ENV === 'development',
+  // Token expiration configuration
+  // In development (npm run dev): 1 minute - for quick testing
+  // In production: 5 days - standard production setting
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: process.env.NODE_ENV === 'development' 
+      ? 1 * 60 // 1 minute in development - for quick testing
+      : 5 * 24 * 60 * 60, // 5 days in production - standard setting
   },
   jwt: {
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: process.env.NODE_ENV === 'development'
+      ? 1 * 60 // 1 minute in development - for quick testing
+      : 5 * 24 * 60 * 60, // 5 days in production - standard setting
   },
   callbacks: {
     async signIn({ user, account, profile }) {
+      // For social logins, ensure user has a role
       if (account?.provider === 'google' || account?.provider === 'github') {
-        // For social logins, ensure user has a role
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
           include: { role: true }
@@ -98,21 +105,26 @@ const authOptions: AuthOptions = {
       }
       return true
     },
-    async jwt({ token, user, account }) {
-      if (user) {
-        // For credentials login
-        token.role = user.role
-        token.id = user.id
-      } else if (token.email) {
-        // For social logins, fetch the role
+    async jwt({ token, user, account, trigger }) {
+      // Handle token refresh
+      if (trigger === "update") {
+        return { ...token }
+      }
+
+      // For social logins, ensure we have the user data
+      if (account?.provider === 'google' || account?.provider === 'github') {
         const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
+          where: { email: token.email! },
           include: { role: true }
         })
         if (dbUser?.role) {
-          token.role = dbUser.role.name
+          token.role = dbUser.role.name as UserRole
           token.id = dbUser.id
         }
+      } else if (user) {
+        // For credentials login
+        token.role = user.role
+        token.id = user.id
       }
       return token
     },
@@ -128,6 +140,19 @@ const authOptions: AuthOptions = {
     signIn: '/auth/signin',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  // Enable CSRF protection for all providers
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  }
 }
 
 // Export the handler
