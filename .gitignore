@@ -42,6 +42,11 @@ next-env.d.ts
 .idea
 .vscode
 
-# test files
+# Test files
 /src/app/token-debug/
 /src/components/TokenDebug.tsx
+/src/lib/auth/__tests__/
+/src/scripts/
+/src/app/test/
+/src/app/tests/
+
