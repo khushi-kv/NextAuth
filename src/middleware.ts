@@ -2,14 +2,25 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * Middleware function that adds security headers to all responses
- * This middleware runs on every request to your application
+ * Middleware function that handles all incoming requests
+ * 
+ * Flow for each request:
+ * 1. Middleware intercepts the request
+ * 2. Checks for valid session/JWT token
+ * 3. Validates user permissions
+ * 4. Applies security headers
+ * 5. Forwards the request if all checks pass
  * 
  * @param request - The incoming request object
  * @returns Response with security headers
  */
 export function middleware(request: NextRequest) {
   const response = NextResponse.next()
+
+  /**
+   * Security Headers Configuration
+   * These headers protect against common web vulnerabilities
+   */
 
   /**
    * X-Frame-Options: DENY
@@ -78,6 +89,17 @@ export function middleware(request: NextRequest) {
  * Configuration for the middleware
  * matcher: '/:path*' means this middleware runs on all routes
  * This ensures security headers are added to every response
+ * 
+ * Protected Routes Flow:
+ * 1. Middleware intercepts request to protected route
+ * 2. Checks for valid session/JWT token
+ * 3. Validates user role against required permissions
+ * 4. If authorized:
+ *    - Allows access to the route
+ *    - Updates session if needed
+ * 5. If unauthorized:
+ *    - Redirects to login page
+ *    - Returns 403 Forbidden
  */
 export const config = {
   matcher: '/:path*'

@@ -34,7 +34,7 @@ export default function SessionTimer() {
         setTimeLeft(remaining)
 
         // Auto-refresh when 30 seconds remaining
-        if (remaining <= 30 && remaining > 0) {
+        if (remaining <= 10 && remaining > 0) {
           handleRefresh()
         }
       }

@@ -64,20 +64,33 @@ const authOptions: AuthOptions = {
     })
   ],
   debug: process.env.NODE_ENV === 'development',
-  // Token expiration configuration
-  // In development (npm run dev): 1 minute - for quick testing
-  // In production: 5 days - standard production setting
+  
+  // Session Configuration
+  // When authentication is successful:
+  // 1. Creates a new session in the database
+  // 2. Generates a JWT token containing user data
+  // 3. Stores the token in secure HTTP-only cookies
+  // 4. Sets session expiration based on environment
   session: {
     strategy: 'jwt',
     maxAge: process.env.NODE_ENV === 'development' 
       ? 1 * 60 // 1 minute in development - for quick testing
-      : 5 * 24 * 60 * 60, // 5 days in production - standard setting
+      : 30 * 24 * 60 * 60, // 30 days in production - standard setting
+    updateAge: 24 * 60 * 60, // 1 day - how often to update the session
   },
+
+  // JWT Configuration
+  // The JWT token contains:
+  // 1. User ID for identification
+  // 2. User role for authorization
+  // 3. Session metadata
+  // 4. Expiration timestamp
   jwt: {
     maxAge: process.env.NODE_ENV === 'development'
       ? 1 * 60 // 1 minute in development - for quick testing
-      : 5 * 24 * 60 * 60, // 5 days in production - standard setting
+      : 30 * 24 * 60 * 60, // 30 days in production - standard setting
   },
+
   callbacks: {
     async signIn({ user, account, profile }) {
       // For social logins, ensure user has a role
