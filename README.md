@@ -508,3 +508,9 @@ npx prisma migrate deploy
    - Run `npx prisma generate` after schema changes
    - Check Prisma logs for errors
    - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
