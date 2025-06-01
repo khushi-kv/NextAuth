@@ -75,16 +75,15 @@ export default function SignInForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
-        callbackUrl: "/dashboard"
+        redirect: false
       })
 
       if (result?.error) {
         setError(errorMessages[result.error] || result.error)
         toast.error(errorMessages[result.error] || result.error)
-      } else if (result?.url) {
+      } else {
         toast.success("Successfully logged in!")
-        router.push(result.url)
+        router.replace("/dashboard")
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Something went wrong"

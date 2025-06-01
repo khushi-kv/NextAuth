@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { RoleBasedSection } from "@/components/RoleBasedContent"
 import { UserRole } from "@prisma/client"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { toast } from 'react-toastify'
-import SessionTimer from "@/components/SessionTimer"
 
 
 // Loading component
@@ -34,10 +33,20 @@ function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth/signin")
+    }
+  }, [status, router])
+
   const handleSignOut = async () => {
-    await signOut({ redirect: false })
-    toast.success("Successfully logged out!")
-    router.push("/auth/signin")
+    try {
+      await signOut({ redirect: false })
+      toast.success("Successfully logged out!")
+      router.push("/auth/signin")
+    } catch (error) {
+      toast.error("Error signing out. Please try again.")
+    }
   }
 
   if (status === "loading") {
@@ -45,7 +54,6 @@ function DashboardContent() {
   }
 
   if (status === "unauthenticated") {
-    router.push("/auth/signin")
     return null
   }
 
@@ -54,7 +62,7 @@ function DashboardContent() {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p>Welcome to your dashboard!</p>
-        <SessionTimer />
+       
       </div>
 
       <RoleBasedSection role={UserRole.ADMIN}>
@@ -92,7 +100,7 @@ function DashboardContent() {
         Sign Out
       </button>
 
-      {/* Session Timer - Uncomment for testing session refresh behavior */}
+      {/* Session Timer - Shows remaining time and handles auto-refresh testing */}
       {/* <SessionTimer /> */}
     </div>
   )
