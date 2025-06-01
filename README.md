@@ -173,6 +173,7 @@ src/
 │   └── auth/
 │       ├── SignInForm.tsx     # Sign in form
 │       └── SignUpForm.tsx     # Registration form
+├── SessionTimer.tsx           # Session management component
 ├── lib/
 │   └── auth/                  # Auth utilities
 └── prisma/
@@ -312,7 +313,7 @@ export const withRole = (role: UserRole) => {
 
 ### Core Security (Provided by NextAuth)
 - ✅ JWT-based session management
-- ✅ Automatic token refresh
+- ✅ Built-in session refresh
 - ✅ CSRF protection
 - ✅ XSS prevention
 - ✅ Secure password requirements
@@ -514,3 +515,7556 @@ npx prisma migrate deploy
 -->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
 
 -->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
+   - Verify DATABASE_URL format
+
+-->Architecture diagram:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/9f864c2c-5fe3-4d4c-b7de-89bc20434466/version/v0.1/edit
+
+-->SignIn/SignUp flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/4834b83c-e4bb-41f2-af0d-539bb19c572d/version/v0.1/edit
+
+-->Role based flow:https://www.mermaidchart.com/app/projects/cad5eaca-d34f-4cda-b8c4-d64967065108/diagrams/a79bb389-80cd-4bd4-a60d-51a582de032f/version/v0.1/edit
+
+## 🔄 Session Management
+
+### Session Configuration
+```typescript
+// Development Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 1 * 60,      // 1 minute session
+  updateAge: 5 * 60,   // Refresh every 5 minutes
+}
+
+// Production Environment
+session: {
+  strategy: 'jwt',
+  maxAge: 30 * 24 * 60 * 60,  // 30 days session
+  updateAge: 24 * 60 * 60,    // Refresh every 24 hours
+}
+```
+
+### Session Timer Component
+- Shows remaining session time
+- Auto-refreshes session before expiration
+- Development testing tool
+- Cross-tab persistence
+
+### Session Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant NextAuth
+    participant Database
+
+    SessionTimer->>NextAuth: Check session status
+    NextAuth->>Database: Verify session
+    Database-->>NextAuth: Session valid
+    NextAuth-->>SessionTimer: Update session
+    SessionTimer->>User: Show remaining time
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/  # NextAuth configuration
+│   ├── auth/
+│   │   ├── signin/            # Sign in page
+│   │   └── register/          # Registration page
+│   └── dashboard/             # Protected dashboard
+├── components/
+│   ├── auth/
+│   │   ├── SignInForm.tsx     # Sign in form
+│   │   └── SignUpForm.tsx     # Registration form
+│   └── SessionTimer.tsx       # Session management component
+├── lib/
+│   └── auth/                  # Auth utilities
+└── prisma/
+    └── schema.prisma          # Database schema
+```
+
+## 🔒 Security Features
+
+### Core Security (Provided by NextAuth)
+- ✅ JWT-based session management
+- ✅ Built-in session refresh
+- ✅ CSRF protection
+- ✅ XSS prevention
+- ✅ Secure password requirements
+- ✅ Form validation
+- ✅ Error handling
+
+### Additional Security (Optional)
+For production environments, consider implementing:
+- ⚠️ IP blocking (blocks suspicious IPs)
+- ⚠️ Custom security headers (additional protection)
+- ⚠️ Request throttling (limits request frequency)
+
+Note: These additional security measures are not part of NextAuth.js core functionality but can be implemented for enhanced security in production environments.
+
+## 🚀 Performance Optimization
+
+### Token Optimization
+- Minimal JWT payload
+- Efficient session storage
+- Automatic cleanup
+
+### Database Optimization
+- Indexed queries
+- Efficient relations
+- Connection pooling
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team
+- NextAuth.js team
+- Prisma team
+- All contributors
+
+## 🗄️ Prisma Setup & Commands
+
+### Initial Setup
+```bash
+# Install Prisma CLI
+npm install prisma --save-dev
+
+# Initialize Prisma in your project
+npx prisma init
+
+# After modifying schema.prisma, generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+```
+
+### Database Management
+```bash
+# Create a new migration
+npx prisma migrate dev --name init
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# View database with Prisma Studio
+npx prisma studio
+```
+
+### Common Prisma Commands
+```bash
+# Format schema.prisma file
+npx prisma format
+
+# Validate schema.prisma file
+npx prisma validate
+
+# Generate Prisma Client
+npx prisma generate
+
+# Check database status
+npx prisma db pull
+```
+
+### Development Workflow
+1. Make changes to `schema.prisma`
+2. Run `npx prisma generate` to update Prisma Client
+3. Run `npx prisma db push` to update database schema
+4. Use Prisma Studio (`npx prisma studio`) to view/edit data
+
+### Production Deployment
+```bash
+# Generate Prisma Client for production
+npx prisma generate
+
+# Apply migrations in production
+npx prisma migrate deploy
+```
+
+## 🐘 PostgreSQL Setup
+
+### Installation
+
+1. **Install PostgreSQL**
+   - **macOS:**
+     ```bash
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
+   - **Ubuntu:**
+     ```bash
+     sudo apt update
+     sudo apt install postgresql postgresql-contrib
+     sudo systemctl start postgresql
+     sudo systemctl enable postgresql
+     ```
+   - **Windows:**
+     - Download installer from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+     - Run the installer and follow the setup wizard
+
+2. **Create Database**
+   ```bash
+   # Connect to PostgreSQL
+   psql postgres
+
+   # Create database
+   CREATE DATABASE nextauth_db;
+
+   # Create user (optional)
+   CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
+
+   # Grant privileges
+   GRANT ALL PRIVILEGES ON DATABASE nextauth_db TO myuser;
+   ```
+
+3. **Update Environment Variables**
+   ```env
+   # For local development
+   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nextauth_db"
+   ```
+
+### Database Connection
+
+1. **Test Connection**
+   ```bash
+   # Connect to database
+   psql -U myuser -d nextauth_db
+   
+   # List tables (after Prisma setup)
+   \dt
+   ```
+
+2. **Common PostgreSQL Commands**
+   ```sql
+   -- List all databases
+   \l
+
+   -- Connect to database
+   \c nextauth_db
+
+   -- List all tables
+   \dt
+
+   -- Describe table
+   \d table_name
+
+   -- Exit
+   \q
+   ```
+
+### Troubleshooting
+
+1. **Connection Issues**
+   - Check if PostgreSQL is running
+   - Verify database credentials
+   - Ensure database exists
+   - Check port availability (default: 5432)
+
+2. **Permission Issues**
+   - Verify user privileges
+   - Check database ownership
+   - Ensure correct password
+
+3. **Prisma Issues**
+   - Run `npx prisma generate` after schema changes
+   - Check Prisma logs for errors
