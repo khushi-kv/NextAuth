@@ -74,9 +74,11 @@ const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt',
     maxAge: process.env.NODE_ENV === 'development' 
-      ? 1 * 60 // 1 minute in development - for quick testing
+      ? 1 * 60 // 1 minutes in development - for testing
       : 30 * 24 * 60 * 60, // 30 days in production - standard setting
-    updateAge: 24 * 60 * 60, // 1 day - how often to update the session
+    updateAge: process.env.NODE_ENV === 'development'
+      ? 5 * 60 // 5 minutes in development - balanced for testing
+      : 24 * 60 * 60, // 24 hours in production - daily refresh
   },
 
   // JWT Configuration
@@ -87,7 +89,7 @@ const authOptions: AuthOptions = {
   // 4. Expiration timestamp
   jwt: {
     maxAge: process.env.NODE_ENV === 'development'
-      ? 1 * 60 // 1 minute in development - for quick testing
+      ? 1 * 60 // 2 minutes in development - for testing
       : 30 * 24 * 60 * 60, // 30 days in production - standard setting
   },
 
@@ -121,6 +123,17 @@ const authOptions: AuthOptions = {
     async jwt({ token, user, account, trigger }) {
       // Handle token refresh
       if (trigger === "update") {
+        // When the token is updated, fetch fresh user data
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email! },
+          include: { role: true }
+        })
+        
+        if (dbUser?.role) {
+          token.role = dbUser.role.name as UserRole
+          token.id = dbUser.id
+        }
+        
         return { ...token }
       }
 

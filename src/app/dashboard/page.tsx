@@ -6,7 +6,6 @@ import { signOut } from "next-auth/react"
 import { RoleBasedSection } from "@/components/RoleBasedContent"
 import { UserRole } from "@prisma/client"
 import { Suspense } from "react"
-import { useEffect } from "react"
 import { toast } from 'react-toastify'
 import SessionTimer from "@/components/SessionTimer"
 
@@ -52,7 +51,11 @@ function DashboardContent() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p>Welcome to your dashboard!</p>
+        <SessionTimer />
+      </div>
 
       <RoleBasedSection role={UserRole.ADMIN}>
         <div className="p-4 rounded-lg mb-4">
@@ -89,7 +92,7 @@ function DashboardContent() {
         Sign Out
       </button>
 
-      {/* Session Timer  to test the token refresh*/}
+      {/* Session Timer - Uncomment for testing session refresh behavior */}
       {/* <SessionTimer /> */}
     </div>
   )

@@ -6,18 +6,34 @@ import { useSession } from 'next-auth/react'
 /**
  * SessionTimer Component
  * 
- * Displays a countdown timer for the current session and handles automatic refresh.
- * Features:
- * - Shows time remaining until session expiration
- * - Auto-refreshes session 30 seconds before expiration
- * - Persists timer across tab switches using useRef
- * - Provides manual refresh button
- * - Shows refresh status
+ * A utility component that displays and manages session timing.
+ * 
+ * Key Features:
+ * 1. Session Countdown: Shows time remaining until session expiration
+ * 2. Auto-refresh: Automatically refreshes session before expiration
+ * 3. Cross-tab Persistence: Maintains timer state across browser tabs
+ * 
+ * NextAuth Session Management:
+ * - Sessions are managed by NextAuth.js
+ * - JWT strategy is used for session handling
+ * - Session duration is configured in [...nextauth]/route.ts
+ * 
+ * Development vs Production:
+ * Development:
+ * - Shorter session duration (1 minute) for testing
+ * - More frequent updates (5 minutes)
+ * - Auto-refresh enabled for testing
+ * 
+ * Production:
+ * - Longer session duration (30 days)
+ * - Less frequent updates (24 hours)
+ * - Relies on NextAuth's built-in refresh
  */
 export default function SessionTimer() {
   const { data: session, update } = useSession()
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [refreshStatus, setRefreshStatus] = useState<string>('')
+  
   // Store initial expiry time to prevent reset on tab switches
   const initialExpiryRef = useRef<number | null>(null)
 
@@ -33,8 +49,33 @@ export default function SessionTimer() {
         const remaining = Math.floor((initialExpiryRef.current - now) / 1000)
         setTimeLeft(remaining)
 
-        // Auto-refresh when 30 seconds remaining
-        if (remaining <= 10 && remaining > 0) {
+        /**
+         * Auto-refresh Logic
+         * 
+         * This section handles automatic session refresh when expiration is near.
+         * 
+         * How it works:
+         * 1. Checks if session is about to expire (30 seconds remaining)
+         * 2. Triggers a refresh using NextAuth's update() function
+         * 3. Updates the session expiry time
+         * 
+         * Important Notes:
+         * - This is primarily for development/testing
+         * - In production, NextAuth handles refreshes automatically
+         * - The 30-second threshold can be adjusted based on needs
+         * 
+         * NextAuth Configuration (in [...nextauth]/route.ts):
+         * session: {
+         *   strategy: 'jwt',
+         *   maxAge: process.env.NODE_ENV === 'development' 
+         *     ? 1 * 60  // 1 minute in development
+         *     : 30 * 24 * 60 * 60, // 30 days in production
+         *   updateAge: process.env.NODE_ENV === 'development'
+         *     ? 5 * 60  // 5 minutes in development
+         *     : 24 * 60 * 60, // 24 hours in production
+         * }
+         */
+        if (remaining <= 30 && remaining > 0) {
           handleRefresh()
         }
       }
@@ -51,29 +92,31 @@ export default function SessionTimer() {
   }, [session])
 
   /**
-   * Handles session refresh
-   * - Calls force-refresh endpoint
-   * - Updates session data
-   * - Resets initial expiry time
-   * - Updates refresh status
+   * Session Refresh Handler
+   * 
+   * This function handles session refresh using NextAuth's update() function.
+   * 
+   * Security Considerations:
+   * - NextAuth handles CSRF protection
+   * - Tokens are rotated securely
+   * - Session data is validated
+   * 
+   * Best Practices:
+   * 1. Use update() for manual refreshes
+   * 2. Handle refresh failures gracefully
+   * 3. Update UI to reflect refresh status
+   * 4. Reset expiry time after successful refresh
    */
   const handleRefresh = async () => {
     try {
       setRefreshStatus('Refreshing...')
-      const response = await fetch('/api/auth/force-refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Refresh failed')
-      }
-
-      // Update the session and reset the initial expiry
       await update()
-      initialExpiryRef.current = null
+      
+      // Reset the initial expiry time
+      if (session?.expires) {
+        initialExpiryRef.current = new Date(session.expires).getTime()
+      }
+      
       setRefreshStatus('Refreshed!')
     } catch (error) {
       setRefreshStatus('Refresh failed')
@@ -82,9 +125,10 @@ export default function SessionTimer() {
   }
 
   /**
-   * Formats remaining time in minutes and seconds
-   * @param seconds - Time remaining in seconds
-   * @returns Formatted time string (e.g., "1m 30s") or "Expired"
+   * Time Formatter
+   * 
+   * Formats remaining time in a user-friendly way.
+   * Example: "1m 30s" or "Expired"
    */
   const formatTime = (seconds: number) => {
     if (seconds < 0) return 'Expired'
@@ -94,28 +138,13 @@ export default function SessionTimer() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border">
-      <h3 className="font-semibold mb-2">Session Timer</h3>
-      <p className="text-lg font-mono">
-        {formatTime(timeLeft)}
-      </p>
-      {/* Show warning when refresh is imminent */}
-      {timeLeft > 0 && timeLeft <= 30 && (
-        <p className="text-yellow-600 text-sm mt-1">Refreshing soon...</p>
-      )}
-      {/* Display refresh status */}
+    <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg">
+      <div className="text-sm text-gray-600">
+        Session expires in: {formatTime(timeLeft)}
+      </div>
       {refreshStatus && (
-        <p className={`text-sm mt-1 ${refreshStatus.includes('failed') ? 'text-red-600' : 'text-green-600'}`}>
-          {refreshStatus}
-        </p>
+        <div className="mt-1 text-xs text-gray-500">{refreshStatus}</div>
       )}
-      {/* Manual refresh button */}
-      <button
-        onClick={handleRefresh}
-        className="mt-2 text-sm text-blue-600 hover:text-blue-800"
-      >
-        Force Refresh
-      </button>
     </div>
   )
 } 
